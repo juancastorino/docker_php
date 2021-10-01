@@ -1,0 +1,48 @@
+version: '3.5'
+
+services:
+  php:
+    container_name: php
+    build:
+      context: .
+      dockerfile: docker/php/php.dockerfile
+    volumes:
+      - ./:/appdata/www
+    environment:
+      PHP_IDE_CONFIG: serverName=php
+    ports:
+      - '1000:9000'      
+  server-app-php8:
+    build:
+      context: .
+      dockerfile: docker/server/nginx.dockerfile
+    ports:
+      - '8000:80'
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/server/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - php      
+  database:
+    build:
+      context: .
+      dockerfile: docker/database/database.dockerfile
+    environment:
+      - MYSQL_DATABASE=database_name
+      - MYSQL_USER=admin
+      - MYSQL_PASSWORD=root
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./docker/database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./database/:/var/lib/mysql
+  phpmyadmin:
+    depends_on:
+      - database
+    image: phpmyadmin/phpmyadmin
+    ports:
+      - 8081:80
+    environment:
+      PMA_HOST: database
+      MYSQL_ROOT_PASSWORD: root
