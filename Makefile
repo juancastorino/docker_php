@@ -9,7 +9,6 @@ help: ## Show this help message
 	@egrep '^(.+)\:\ ##\ (.+)' ${MAKEFILE_LIST} | column -t -c 2 -s ':#'
 
 start: ## Start the containers
-	docker network create application-network || true
 	cp -n docker-compose.yml.dist docker-compose.yml || true
 	U_ID=1000 docker-compose up -d
 
@@ -20,7 +19,6 @@ restart: ## Restart the containers
 	$(MAKE) stop && $(MAKE) start
 
 build: ## Rebuilds all the containers
-	docker network create application_network || true
 	cp -n docker-compose.yml.dist docker-compose.yml || true
 	U_ID=1000 docker-compose build
 
